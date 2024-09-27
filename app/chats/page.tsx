@@ -1,8 +1,6 @@
 "use client"
 import { Database } from "@/types/supabasetype"
 import { useEffect, useState } from "react"
-
-import { v4 } from "uuid"
 import { useSearchParams } from "next/navigation"
 import ChatUI from "@/components/chats/chat"
 import { supabase } from "@/utils/supabase/supabase"
@@ -14,8 +12,7 @@ import { Input } from "@/components/input"
 
 
 export default function Chats() {
-  const searchParams = useSearchParams()
-  let channelName ="Chats"// searchParams.get("channel_name")!!
+  let channelName ="Chats"
   const [inputText, setInputText] = useState("")
   const [inputName, setInputName] = useState("")
   const [messageText, setMessageText] = useState<Database["public"]["Tables"]["Chats"]["Row"][]>([])
