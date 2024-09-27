@@ -1,6 +1,6 @@
 "use client"
 import { Database } from "@/types/supabasetype"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import ChatUI from "@/components/chats/chat"
 import { supabase } from "@/utils/supabase/supabase"
@@ -10,12 +10,18 @@ import { ScrollArea } from "@radix-ui/react-scroll-area"
 import { MenuIcon, SendIcon } from "lucide-react"
 import { Input } from "@/components/input"
 
+const channelName ="Chats"
 
 export default function Chats() {
-  let channelName ="Chats"
+  
   const [inputText, setInputText] = useState("")
   const [inputName, setInputName] = useState("")
   const [messageText, setMessageText] = useState<Database["public"]["Tables"]["Chats"]["Row"][]>([])
+  const ref=useRef<any>()
+  useEffect(()=>{
+       //一番下までscrollする
+       ref.current.scrollTop = ref.current.scrollHeight
+  },[messageText.length])
 
   const fetchRealtimeData = () => {
     try {
@@ -33,6 +39,7 @@ export default function Chats() {
               const { created_at, id, message, username } = payload.new
               setMessageText((messageText) => [...messageText, { id, created_at,message, username }])
             }
+     
           }
         )
         .subscribe()
@@ -48,7 +55,7 @@ export default function Chats() {
     (async () => {
       let allMessages = null
       try {
-        const { data } = await supabase.from("Chats").select("*").eq('channel', channelName).order("created_at")
+        const { data } = await supabase.from("Chats").select()
 
         allMessages = data
       } catch (error) {
@@ -79,10 +86,10 @@ export default function Chats() {
           <MenuIcon className="h-6 w-6" />
         </Button>
         <h1 className="text-lg font-semibold">チャットアプリ</h1>
-        <div className="w-8" /> {/* スペーサー */}
+        <div className="w-8" /> 
       </header>
       
-      <ScrollArea className="flex-grow p-4">
+      <div className="overflow-y-scroll h-full" ref={ref}>
         {messageText.map((message) => (
           <div
             key={message.id}
@@ -101,7 +108,7 @@ export default function Chats() {
             </div>
           </div>
         ))}
-      </ScrollArea>
+      </div>
       
       <div className="p-4 border-t">
         <form
@@ -126,6 +133,7 @@ export default function Chats() {
             className="flex-grow"
           />
           <Button
+          disabled={inputText === "" || inputName === ""}
           className="w-[120px]"
            type="submit" size="icon" aria-label="送信">
             <SendIcon className="h-4 w-4" />
